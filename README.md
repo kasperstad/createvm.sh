@@ -7,7 +7,7 @@ By default this script installs and enables the qemu-guest-agent
 
 ## Usage
 
-```bash
+```
 Usage: createvm.sh <parameters> ...
 
 Parameters:
