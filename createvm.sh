@@ -144,11 +144,11 @@ done
 # Default values if they wasn't defined as parameters
 VM_CORES=${VM_CORES:-1}
 VM_MEMORY=${VM_MEMORY:-1024}
-VM_STORAGE=${2:-"local-lvm"}
-VM_DOMAIN=${2:-"localdomain"}
-VM_NET_BRIDGE=${2:-"vmbr0"}
+VM_STORAGE=${VM_STORAGE:-"local-lvm"}
+VM_DOMAIN=${VM_DOMAIN:-"localdomain"}
+VM_NET_BRIDGE=${VM_NET_BRIDGE:-"vmbr0"}
 VM_DISK_SIZE=${VM_DISK_SIZE:-20}
-VM_DISK_FORMAT=${2:-"raw"}
+VM_DISK_FORMAT=${VM_DISK_FORMAT:-"raw"}
 VM_DNS_SERVER=${VM_DNS_SERVER:-"8.8.8.8"}
 
 # Get Help if you don't specify required parameters (yes I know I'm a little demanding ;) )...
