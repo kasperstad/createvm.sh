@@ -179,7 +179,7 @@ EOF
 virt-copy-in -a $tempCloudImg $tempCloudConfFile /etc/cloud/cloud.cfg.d
 
 # Create the new VM
-qm create $VMID --name $VM_NAME --cores $VM_CORES --memory $VM_MEMORY --agent 1
+qm create $VMID --name $VM_NAME --cores $VM_CORES --memory $VM_MEMORY -ostype l26 --agent 1
 
 # Import the image to the storage and attach it
 qm importdisk $VMID $tempCloudImg $VM_STORAGE
