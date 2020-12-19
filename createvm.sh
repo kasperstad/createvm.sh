@@ -2,19 +2,19 @@
 set -e
 
 # MIT License
-# 
+#
 # Copyright (c) 2020 Kasper Stad
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -64,7 +64,7 @@ if [ ${#} -eq 0 ]; then
     get_help
 fi
 
-# Parse all parameters 
+# Parse all parameters
 while [ ${#} -gt 0 ]; do
     case "${1}" in
         -h|--help)
@@ -80,12 +80,12 @@ while [ ${#} -gt 0 ]; do
             shift
             ;;
         -c|--cores)
-            VM_CORES="$2"
+            VM_CORES=$2
             shift
             shift
             ;;
         -m|--memory)
-            VM_MEMORY="$2"
+            VM_MEMORY=$2
             shift
             shift
             ;;
@@ -142,21 +142,21 @@ while [ ${#} -gt 0 ]; do
 done
 
 # Default values if they wasn't defined as parameters
-VM_CORES=${2:-1}
+VM_CORES=${VM_CORES:-1}
 VM_MEMORY=${VM_MEMORY:-1024}
 VM_STORAGE=${2:-"local-lvm"}
 VM_DOMAIN=${2:-"localdomain"}
 VM_NET_BRIDGE=${2:-"vmbr0"}
-VM_DISK_SIZE=${2:-20}
+VM_DISK_SIZE=${VM_DISK_SIZE:-20}
 VM_DISK_FORMAT=${2:-"raw"}
 VM_DNS_SERVER=${VM_DNS_SERVER:-"8.8.8.8"}
 
 # Get Help if you don't specify required parameters (yes I know I'm a little demanding ;) )...
-if [[ -z $VM_NAME || -z $VM_IP_ADDRESS ]] && [[ -f $VM_SSH_KEYFILE ]]; then
+if [[ -z $VM_NAME || -z $VM_IP_ADDRESS || -z $VM_SSH_KEYFILE ]]; then
     get_help
 fi
 
-# Fetch the next available VM ID 
+# Fetch the next available VM ID
 VMID=$(pvesh get /cluster/nextid)
 
 # Temporary variables for generating the image
