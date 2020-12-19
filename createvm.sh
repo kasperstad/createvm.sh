@@ -47,7 +47,7 @@ Parameters:
     --dns-server            DNS Server (default: 8.8.8.8)
     --gateway               Default Gateway, if undefined, script will set it to the specified IP with the fouth octet as .1
                             (eg. default gateway will be 192.168.1.1)
-    --ssh-key               (required) SSH Key used for ssh'ing in using the user \"ubuntu\"
+    --ssh-keyfile           (required) SSH Keys used for ssh'ing in using the user \"ubuntu\", multiple ssh-keys allowed in file (one key on each line)
     --no-start-created      Don't start the VM after it's created
 "
     exit 1
@@ -127,8 +127,8 @@ while [ ${#} -gt 0 ]; do
             shift
             shift
             ;;
-        --ssh-key)
-            VM_SSH_KEY="$2"
+        --ssh-keyfile)
+            VM_SSH_KEYFILE="$2"
             shift
             shift
             ;;
@@ -152,40 +152,31 @@ VM_DISK_FORMAT=${2:-"raw"}
 VM_DNS_SERVER=${VM_DNS_SERVER:-"8.8.8.8"}
 
 # Get Help if you don't specify required parameters (yes I know I'm a little demanding ;) )...
-if [[ -z $VM_SSH_KEY || -z $VM_NAME || -z $VM_IP_ADDRESS ]]; then
+if [[ -z $VM_NAME || -z $VM_IP_ADDRESS ]] && [[ -f $VM_SSH_KEYFILE ]]; then
     get_help
 fi
 
 # Fetch the next available VM ID 
 VMID=$(pvesh get /cluster/nextid)
 
-# Local Storage where template and snippets will be stored
-# there should only be one, ideally you wold use the default "local here"
-localStorage=$(awk '{if(/path/) print $2}' /etc/pve/storage.cfg | head -n 1)
-
-# Retrive the latest cloud image from URL
+# Temporary variables for generating the image
 tempCloudImg="/tmp/$(basename $CLOUDIMG)"
+tempCloudConfFile="/tmp/50_guest-agent.cfg"
+
+# Download the image
 wget --show-progress -o /dev/null -O $tempCloudImg $CLOUDIMG
 
-# Generate the Cloud-init user-data
-cat > "${localStorage}/snippets/${VMID}.yml" << EOF
-#cloud-config
-hostname: ${VM_NAME}
-manage_etc_hosts: true
-fqdn: ${VM_NAME}.${VM_DOMAIN}
-ssh_authorized_keys:
-  - ${VM_SSH_KEY}
-chpasswd:
-  expire: False
-users:
-  - default
-package_upgrade: true
+# Generate additional cloud-init config to install qemu-guest-agent
+cat > $tempCloudConfFile << EOF
 packages:
   - qemu-guest-agent
 runcmd:
   - systemctl enable qemu-guest-agent
   - systemctl restart qemu-guest-agent
 EOF
+
+# Copy the new cloud-init
+virt-copy-in -a $tempCloudImg $tempCloudConfFile /etc/cloud/cloud.cfg.d
 
 # Create the new VM
 qm create $VMID --name $VM_NAME --cores $VM_CORES --memory $VM_MEMORY --agent 1
@@ -202,7 +193,9 @@ qm set $VMID --boot c --bootdisk scsi0
 
 # Add a cloud-init drive
 qm set $VMID --ide2 $VM_STORAGE:cloudinit
-qm set $VMID --cicustom "user=local:snippets/$VMID.yml"
+
+# Add the SSH Keys to the server
+qm set $VMID --sshkey $VM_SSH_KEYFILE
 
 # Set the VM to use serial0 as the default vga device
 qm set $VMID --serial0 socket --vga serial0
@@ -227,3 +220,4 @@ fi
 
 # remove the downloaded image
 rm -f $tempCloudImg
+rm -f $tempCloudConfFile

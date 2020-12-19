@@ -5,6 +5,14 @@ This script is meant to allow very custom user-data (fx. installing a webserver 
 
 By default this script installs and enables the qemu-guest-agent
 
+## Requirements
+
+This script depends on **libguestfs-tools** to copy files into the baseimage (not installed by default)
+
+```bash
+proxmox:~$ sudo apt-get install -yq libguestfs-tools
+```
+
 ## Usage
 
 ```
@@ -25,7 +33,7 @@ Parameters:
     --dns-server            DNS Server (default: 8.8.8.8)
     --gateway               Default Gateway, if undefined, script will set it to the specified IP with the fouth octet as .1
                             (eg. default gateway will be 192.168.1.1)
-    --ssh-key               (required) SSH Key used for ssh'ing in using the user "ubuntu"
+    --ssh-keyfile           (required) SSH Keys used for ssh'ing in using the user "ubuntu", multiple ssh-keys allowed in file (one key on each line)
     --no-start-created      Don't start the VM after it's created
 ```
 
