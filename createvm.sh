@@ -183,9 +183,8 @@ if [[ -z $VM_NAME || -z $VM_IP_ADDRESS || -z $VM_SSH_KEYFILE ]]; then
     get_help
 fi
 
-VM_CLOUDIMG_TEMPLATEPATH="${VM_CLOUDIMG_TEMPLATEPATH}/template"
-
-echo $VM_OSTYPE
+VM_CLOUDIMG_TEMPLATEPATH="${VM_CLOUDIMG_TEMPLATEPATH}/template/cloud"
+mkdir -p ${VM_CLOUDIMG_TEMPLATEPATH}
 
 case "${VM_OSTYPE}" in
     ubuntu18)
@@ -208,38 +207,37 @@ esac
 # Fetch the next available VM ID
 VMID=$(pvesh get /cluster/nextid)
 
-if [ -f "${VM_CLOUDIMG_PATH}.md5sum" ]; then
+# Check if we have the image and a md5sum already, if we have both, check if there is a newer image
+# If a newer image is available download and use that (save the md5sum for later usage)
+# If we don't have any of that, we'll just download the image (and save the image md5sum)
+if [[ -f "${VM_CLOUDIMG_PATH}.md5sum" && -f "${VM_CLOUDIMG_PATH}.md5sum" ]]; then
     wget -o /dev/null -O "${VM_CLOUDIMG_TEMPLATEPATH}/MD5SUMS" ${VM_CLOUDIMG_MD5SUMS}
     grep "$(basename $VM_CLOUDIMG_URL)" "${VM_CLOUDIMG_TEMPLATEPATH}/MD5SUMS" | awk '{print $1}' > "${VM_CLOUDIMG_PATH}.md5sum.new"
-    if [ "$(cat ${VM_CLOUDIMG_PATH}.md5sum)" -ne "$(cat ${VM_CLOUDIMG_PATH}.md5sum.new)" ]; then
-        echo "[$BASENAME]: newer image available, downloading"
+    if [[ -f "${VM_CLOUDIMG_PATH}.md5sum" ]] && [[ $(cat ${VM_CLOUDIMG_PATH}.md5sum) != $(cat ${VM_CLOUDIMG_PATH}.md5sum.new) ]]; then
+        echo "[$BASENAME]: newer image available, downloading new image"
         wget --show-progress -o /dev/null -O $VM_CLOUDIMG_PATH $VM_CLOUDIMG_URL
-        mv "${VM_CLOUDIMG_PATH}.md5sum.new" "${VM_CLOUDIMG_PATH}.md5sum"
+    else
+        echo "[$BASENAME]: image not newer, using cached image"
     fi
 else
-    echo "[$BASENAME]: newer image available, downloading"
+    echo "[$BASENAME]: no image found, downloading image"
     wget -o /dev/null -O "${VM_CLOUDIMG_TEMPLATEPATH}/MD5SUMS" ${VM_CLOUDIMG_MD5SUMS}
-    grep "$(basename $VM_CLOUDIMG_URL)" "${VM_CLOUDIMG_TEMPLATEPATH}/MD5SUMS" > "${VM_CLOUDIMG_PATH}.md5sum"
+    grep "$(basename $VM_CLOUDIMG_URL)" "${VM_CLOUDIMG_TEMPLATEPATH}/MD5SUMS" | awk '{print $1}' > "${VM_CLOUDIMG_PATH}.md5sum"
     wget --show-progress -o /dev/null -O $VM_CLOUDIMG_PATH $VM_CLOUDIMG_URL
 fi
 
-if [ -f "${VM_CLOUDIMG_TEMPLATEPATH}/MD5SUMS" ]; then
-    rm -f "${VM_CLOUDIMG_TEMPLATEPATH}/MD5SUMS"
+# Remove downloaded MDSums
+rm -f "${VM_CLOUDIMG_TEMPLATEPATH}/MD5SUMS"
+
+# If w have a new md5sum file, move it
+if [ -f "${VM_CLOUDIMG_PATH}.md5sum.new" ]; then
+    mv "${VM_CLOUDIMG_PATH}.md5sum.new" "${VM_CLOUDIMG_PATH}.md5sum"
 fi
 
-exit
-
-
-# Temporary variables for generating the image
-#tempCloudImg="/tmp/$(basename $CLOUDIMG)"
-
-
-# Download the image
-#wget --show-progress -o /dev/null -O $tempCloudImg $CLOUDIMG
-
 # Generate additional cloud-init config to install qemu-guest-agent
+tempCloudConfFile="${VM_CLOUDIMG_TEMPLATEPATH}/00_agent.cfg"
 
-tempCloudConfFile="/tmp/50_guest-agent.cfg"
+# Add content to the new cloud-init config
 cat > $tempCloudConfFile << EOF
 packages:
   - qemu-guest-agent
@@ -250,6 +248,9 @@ EOF
 
 # Copy the new cloud-init
 virt-copy-in -a $tempCloudImg $tempCloudConfFile /etc/cloud/cloud.cfg.d
+
+# Remove temporary cloudimage
+rm -f $tempCloudConfFile
 
 # Create the new VM
 qm create $VMID --name $VM_NAME --cores $VM_CORES --memory $VM_MEMORY -ostype l26 --agent 1
@@ -290,7 +291,3 @@ qm set $VMID --searchdomain $VM_DOMAIN
 if [ -z $VM_NO_START_CREATED ]; then
     qm start $VMID
 fi
-
-# remove the downloaded image
-rm -f $tempCloudImg
-rm -f $tempCloudConfFile

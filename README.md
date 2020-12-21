@@ -22,6 +22,8 @@ Parameters:
     -h, --help              Show this help message.
     -n, --name              (required) Name of the VM without spaces, dots and other ambiguous characters
                             If longer than 15 characters, the name will automatically be shortned
+    -o, --ostype            Operating System (default: ubuntu20)
+                            valid options are: ubuntu18, ubuntu20, debian10
     -c, --cores             CPU Cores that will be assigned to the VM (default: 1)
     -m, --memory            Memory that will be allocated to the VM in MB (default: 1024)
     -s, --storage           Storage where the VM will be placed (default: local-lvm)
