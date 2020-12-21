@@ -34,7 +34,7 @@ function get_help()
 {
     echo
     echo "Usage: $BASENAME <parameters> ..."
-    echo 
+    echo
     echo "Parameters:"
     echo "    -h, --help              Show this help message."
     echo "    -n, --name              (required) Name of the VM without spaces, dots and other ambiguous characters"
@@ -209,7 +209,7 @@ VMID=$(pvesh get /cluster/nextid)
 
 # Check if we have the image and a md5sum already, if we have both, check if there is a newer image
 # If a newer image is available download and use that (save the md5sum for later usage)
-# If we don't have any of that, we'll just download the image (and save the image md5sum)
+# If we dont have any of that, we will just download the image (and save the image md5sum)
 if [[ -f "${VM_CLOUDIMG_PATH}.md5sum" && -f "${VM_CLOUDIMG_PATH}.md5sum" ]]; then
     wget -o /dev/null -O "${VM_CLOUDIMG_TEMPLATEPATH}/MD5SUMS" ${VM_CLOUDIMG_MD5SUMS}
     grep "$(basename $VM_CLOUDIMG_URL)" "${VM_CLOUDIMG_TEMPLATEPATH}/MD5SUMS" | awk '{print $1}' > "${VM_CLOUDIMG_PATH}.md5sum.new"
