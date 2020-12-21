@@ -211,7 +211,7 @@ VMID=$(pvesh get /cluster/nextid)
 if [ -f "${VM_CLOUDIMG_PATH}.md5sum" ]; then
     wget -o /dev/null -O "${VM_CLOUDIMG_TEMPLATEPATH}/MD5SUMS" ${VM_CLOUDIMG_MD5SUMS}
     grep "$(basename $VM_CLOUDIMG_URL)" "${VM_CLOUDIMG_TEMPLATEPATH}/MD5SUMS" > "${VM_CLOUDIMG_PATH}.md5sum.new"
-    if [ $(cat "${VM_CLOUDIMG_PATH}.md5sum") -ne $(cat "${VM_CLOUDIMG_PATH}.md5sum.new") ]; then
+    if [ "$(cat \"${VM_CLOUDIMG_PATH}.md5sum\")" -ne "$(cat \"${VM_CLOUDIMG_PATH}.md5sum.new\")" ]; then
         echo "[$BASENAME]: newer image available, downloading"
         wget --show-progress -o /dev/null -O $VM_CLOUDIMG_PATH $VM_CLOUDIMG_URL
         mv "${VM_CLOUDIMG_PATH}.md5sum.new" "${VM_CLOUDIMG_PATH}.md5sum"
