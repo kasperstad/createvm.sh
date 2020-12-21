@@ -256,7 +256,7 @@ rm -f $tempCloudConfFile
 qm create $VMID --name $VM_NAME --cores $VM_CORES --memory $VM_MEMORY -ostype l26 --agent 1
 
 # Import the image to the storage and attach it
-qm importdisk $VMID $tempCloudImg $VM_STORAGE
+qm importdisk $VMID ${VM_CLOUDIMG_PATH} $VM_STORAGE
 qm set $VMID --scsihw virtio-scsi-pci --scsi0 $VM_STORAGE:vm-$VMID-disk-0,discard=on
 
 # Resize the imported disk
