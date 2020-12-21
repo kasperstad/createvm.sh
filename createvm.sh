@@ -247,7 +247,7 @@ runcmd:
 EOF
 
 # Copy the new cloud-init
-virt-copy-in -a $tempCloudImg $tempCloudConfFile /etc/cloud/cloud.cfg.d
+virt-copy-in -a ${VM_CLOUDIMG_PATH} $tempCloudConfFile /etc/cloud/cloud.cfg.d
 
 # Remove temporary cloudimage
 rm -f $tempCloudConfFile
