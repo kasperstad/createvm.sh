@@ -95,9 +95,6 @@ while [ ${#} -gt 0 ]; do
                 debian10)
                     VM_OSTYPE="debian10"
                     ;;
-                *)
-                    VM_OSTYPE="ubuntu20"
-                    ;;
             esac
             shift
             shift
@@ -176,6 +173,7 @@ VM_MEMORY=${VM_MEMORY:-1024}
 VM_STORAGE=${VM_STORAGE:-"local-lvm"}
 VM_DOMAIN=${VM_DOMAIN:-"localdomain"}
 VM_NET_BRIDGE=${VM_NET_BRIDGE:-"vmbr0"}
+VM_OSTYPE=${VM_OSTYPE:-"ubuntu20"}
 VM_DISK_SIZE=${VM_DISK_SIZE:-20}
 VM_DISK_FORMAT=${VM_DISK_FORMAT:-"raw"}
 VM_DNS_SERVER=${VM_DNS_SERVER:-"8.8.8.8"}
@@ -204,9 +202,6 @@ case "${VM_OSTYPE}" in
         VM_CLOUDIMG_MD5SUMS="https://cdimage.debian.org/cdimage/openstack/current/MD5SUMS"
         VM_CLOUDIMG_URL="https://cdimage.debian.org/cdimage/openstack/current-10/debian-10-openstack-amd64.qcow2"
         VM_CLOUDIMG_PATH="${VM_CLOUDIMG_TEMPLATEPATH}/$(basename $VM_CLOUDIMG_URL)"
-        ;;
-    *)
-        get_help
         ;;
 esac
 
