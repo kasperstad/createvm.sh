@@ -36,6 +36,7 @@ Parameters:
     -h, --help              Show this help message.
     -n, --name              (required) Name of the VM without spaces, dots and other ambiguous characters
                             If longer than 15 characters, the name will automatically be shortned
+    -o, --ostype            Operating System, valid options are: ubuntu18, ubuntu20, debian10 (default: ubuntu20)
     -c, --cores             CPU Cores that will be assigned to the VM (default: 1)
     -m, --memory            Memory that will be allocated to the VM in MB (default: 1024)
     -s, --storage           Storage where the VM will be placed (default: local-lvm)
@@ -76,6 +77,21 @@ while [ ${#} -gt 0 ]; do
                 echo "[$0] specified hostname is invalid"
                 exit 1
             fi
+            shift
+            shift
+            ;;
+        -o|--ostype)
+            case "$2" in
+                ubuntu18)
+                    VM_OSTYPE="ubuntu18"
+                ubuntu20)
+                    VM_OSTYPE="ubuntu20"
+                debian10)
+                    VM_OSTYPE="debian10"
+                *)
+                    VM_OSTYPE="ubuntu20"
+                    ;;
+            esac
             shift
             shift
             ;;
