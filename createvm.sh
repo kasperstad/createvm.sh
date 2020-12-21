@@ -187,6 +187,8 @@ fi
 
 VM_CLOUDIMG_TEMPLATEPATH="${VM_CLOUDIMG_TEMPLATEPATH}/template"
 
+echo $VM_OSTYPE
+
 case "${VM_OSTYPE}" in
     ubuntu18)
         VM_CLOUDIMG_MD5SUMS="https://cloud-images.ubuntu.com/bionic/current/MD5SUMS"
