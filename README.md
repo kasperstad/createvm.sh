@@ -1,17 +1,7 @@
-# createvm.sh
+# pve-ubuntu-vmbuilder
 
 Create a QEMU VM on Proxmox using the Ubuntu Cloud Image and cloud-init.
-This script is meant to allow very custom user-data (fx. installing a webserver or other customization actions)
-
-By default this script installs and enables the qemu-guest-agent
-
-## Requirements
-
-This script depends on **libguestfs-tools** to copy files into the baseimage (not installed by default)
-
-```bash
-proxmox:~$ sudo apt-get install -yq libguestfs-tools
-```
+Currently this script only supports Ubuntu 20.04 LTS Cloud Image (may be changed in the future)
 
 ## Usage
 
@@ -19,24 +9,26 @@ proxmox:~$ sudo apt-get install -yq libguestfs-tools
 Usage: createvm.sh <parameters> ...
 
 Parameters:
-    -h, --help              Show this help message.
-    -n, --name              (required) Name of the VM without spaces, dots and other ambiguous characters
-                            If longer than 15 characters, the name will automatically be shortned
-    -o, --ostype            Operating System (default: ubuntu20)
-                            valid options are: ubuntu18, ubuntu20, debian10
+    -a, --agent             Install QEMU Agent using cloud-init user-data (default is not installed)
+                            If this switch is appended to the command a warning about not being able to modify user-data through Proxmox WebUI is shown
     -c, --cores             CPU Cores that will be assigned to the VM (default: 1)
-    -m, --memory            Memory that will be allocated to the VM in MB (default: 1024)
-    -s, --storage           Storage where the VM will be placed (default: local-lvm)
-    -d, --domain            Domainname of this VM (eg. example.com)
-    -i, --ip-address        (required) IP Address of this VM in CIDR format (eg. 192.168.1.2/24)
-    --network-bridge        Network Bridge that the VM should be attached to (default: vmbr0)
+    --cloudimg-cache-path   Path where Ubuntu Cloud Image should be stored (default: /var/lib/vz/template)
+    -d, --domain            Domainname of this VM eg. example.com (default: localdomain)
+    --disk-format           Format of the disk, leave out if not using a supported storage (valid formats: qcow2/raw/vmdk)
+                            For LVM-Thin storage (this scripts default) don't specify anything
     --disk-size             Size of the VM disk in GB (default: 20)
-    --disk-format           Format of the disk, leave out if not using a supported storage (default: raw)
     --dns-server            DNS Server (default: 8.8.8.8)
     --gateway               Default Gateway, if undefined, script will set it to the specified IP with the fouth octet as .1
                             (eg. default gateway will be 192.168.1.1)
-    --ssh-keyfile           (required) SSH Keys used for ssh'ing in using the user "ubuntu", multiple ssh-keys allowed in file (one key on each line)
+    -h, --help              Show this help message.
+    -i, --ip-address        (required) IP Address of this VM in CIDR format (eg. 192.168.1.2/24)
+    -m, --memory            Memory that will be allocated to the VM in MB (default: 1024)
+    -n, --name              (required) Name of the VM without spaces, dots and other ambiguous characters
+    --network-bridge        Network Bridge that the VM should be attached to (default: vmbr0)
     --no-start-created      Don't start the VM after it's created
+    --ssh-keyfile           (required) SSH Keys used for ssh'ing in using the user "ubuntu", multiple ssh-keys allowed in file (one key on each line)
+    -s, --storage           Storage where the VM will be placed (default: local-lvm)
+    --vlan                  VLAN Tag for network interface
 ```
 
 ## License
