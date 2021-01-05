@@ -200,6 +200,11 @@ if [[ -z $VM_NAME || -z $VM_IP_ADDRESS || -z $VM_SSH_KEYFILE ]]; then
     get_help
 fi
 
+# Create Cache Path if not exist
+if [ ! -d $VM_CLOUDIMG_CACHE_PATH ]; then
+    mkdir -p $VM_CLOUDIMG_CACHE_PATH
+fi
+
 # Cloudimage base variables
 VM_CLOUDIMG_NAME=$(basename $VM_CLOUDIMG_URL)
 VM_CLOUDIMG_FULL_PATH="${VM_CLOUDIMG_CACHE_PATH}/${VM_CLOUDIMG_NAME}"
