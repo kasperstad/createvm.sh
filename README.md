@@ -3,10 +3,17 @@
 Create a QEMU VM on Proxmox using the Ubuntu Cloud Image and cloud-init.
 Currently this script only supports Ubuntu 20.04 LTS Cloud Image (may be changed in the future)
 
+## Installation
+
+```shell
+root@pve:~# wget -O /usr/local/sbin/vmbuilder https://raw.githubusercontent.com/kasperstad/pve-ubuntu-vmbuilder/master/vmbuilder.sh
+root@pve:~# chmod a+rx /usr/local/sbin/vmbuilder
+```
+
 ## Usage
 
-```
-Usage: createvm.sh <parameters> ...
+```shell
+Usage: vmbuilder <parameters> ...
 
 Parameters:
     -a, --agent             Install QEMU Agent using cloud-init user-data (default is not installed)
