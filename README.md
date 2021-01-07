@@ -12,7 +12,7 @@ root@pve:~# chmod a+rx /usr/local/sbin/vmbuilder
 
 ## Usage
 
-```shell
+```
 Usage: vmbuilder <parameters> ...
 
 Parameters:
