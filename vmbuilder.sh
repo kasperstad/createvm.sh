@@ -287,6 +287,8 @@ if [ $VM_INSTALL_QEMU_AGENT ]; then
     echo -e "[$BASENAME]: \033[1;33m  ${VM_CICUSTOM_USER_DATA}\033[0m"; sleep 1
     cat > $VM_CICUSTOM_USER_DATA << EOF
 $(qm cloudinit dump $VMID user)
+apt_reboot_if_required: True
+timezone: Europe/Copenhagen
 packages:
   - qemu-guest-agent
 runcmd:
