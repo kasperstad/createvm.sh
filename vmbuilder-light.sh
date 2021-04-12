@@ -39,7 +39,6 @@ function get_help()
     echo "    --disk-size             Size of the VM disk in GB (default: 20)"
     echo "    -h, --help              Show this help message."
     echo "    -i, --ip-address        (required) IP Address of this VM in CIDR format (eg. 192.168.1.2/24)"
-    echo "    --id                    Proxmox VM ID"
     echo "    -m, --memory            Memory that will be allocated to the VM in MB (default: 1024)"
     echo "    -n, --name              (required) Name of the VM without spaces, dots and other ambiguous characters"
     echo
