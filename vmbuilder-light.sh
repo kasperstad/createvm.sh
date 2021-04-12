@@ -97,6 +97,10 @@ while [ ${#} -gt 0 ]; do
             shift
             shift
             ;;
+        --no-start)
+            VM_NO_START_CREATED=1
+            shift
+            ;;
         *)
             get_help
             ;;
@@ -109,19 +113,19 @@ VM_CLOUDIMG_URL="https://cloud-images.ubuntu.com/focal/current/focal-server-clou
 # Default values if they wasn't defined as parameters
 # CHANGE THESE VALUES AS NEEDED IF YOU LIKE!
 VM_CORES=${VM_CORES:-1}
-VM_DISK_SIZE=${VM_DISK_SIZE:-20}
+VM_DISK_SIZE=${VM_DISK_SIZE:-10}
 VM_DNS_SERVER=${VM_DNS_SERVER:-"8.8.8.8"}
 VM_DOMAIN=${VM_DOMAIN:-"localdomain"}
 VM_MEMORY=${VM_MEMORY:-1024}
 VM_NET_BRIDGE=${VM_NET_BRIDGE:-"vmbr0"}
-VM_NET_VLAN=${VM_NET_VLAN:-2}
+VM_NET_VLAN=${VM_NET_VLAN:-""}
 VM_SNIPPETS_STORAGE_NAME=${VM_SNIPPETS_STORAGE_NAME:-"local"}
 VM_SNIPPETS_STORAGE_PATH=${VM_SNIPPETS_STORAGE_PATH:-"/var/lib/vz/snippets"}
 VM_SSH_KEYFILE=${VM_SSH_KEYFILE:-"${HOME}/.ssh/id_rsa.pub"}
 VM_STORAGE=${VM_STORAGE:-"local-lvm"}
 
 # Get Help if you don't specify required parameters (yes I know I'm a little demanding ;) )...
-if [[ -z $VM_NAME || -z $VM_IP_ADDRESS || -z $VM_SSH_KEYFILE || -z $VMID ]]; then
+if [[ -z $VM_NAME || -z $VM_IP_ADDRESS || -z $VM_SSH_KEYFILE ]]; then
     get_help
 fi
 
@@ -132,11 +136,17 @@ VM_CLOUDIMG_FULL_PATH="/tmp/${VM_CLOUDIMG_NAME}"
 echo -e "[$BASENAME]: \033[1;32mdownloading image...\033[0m"
 wget --show-progress -o /dev/null -O $VM_CLOUDIMG_FULL_PATH $VM_CLOUDIMG_URL
 
+# Fetch the next available VM ID
+VMID=$(pvesh get /cluster/nextid)
+
 # Create the new VM
 qm create $VMID --name $VM_NAME --cores $VM_CORES --memory $VM_MEMORY -ostype l26
 
 # Import the image to the storage
 qm importdisk $VMID $VM_CLOUDIMG_FULL_PATH $VM_STORAGE | egrep -v '^transferred:'
+
+# Delete cloud-image when disk is imported
+rm -f ${VM_CLOUDIMG_FULL_PATH}
 
 # Attach the disk to scsi0 bus
 qm set $VMID --scsihw virtio-scsi-pci --scsi0 $VM_STORAGE:vm-$VMID-disk-0,discard=on
@@ -157,7 +167,11 @@ qm set $VMID --sshkey $VM_SSH_KEYFILE
 qm set $VMID --serial0 socket --vga serial0
 
 # Attach network interface to a bridge, and optionally set VLAN tag
-qm set $VMID --net0 virtio,bridge=$VM_NET_BRIDGE,tag=$VM_NET_VLAN,firewall=1
+if [ ! -z $VM_NET_VLAN ]; then
+    qm set $VMID --net0 virtio,bridge=$VM_NET_BRIDGE,tag=$VM_NET_VLAN
+else
+    qm set $VMID --net0 virtio,bridge=$VM_NET_BRIDGE
+fi
 
 # If no default gateway is defined, we're creating one
 if [ -z "${VM_GATEWAY}" ]; then
@@ -186,6 +200,6 @@ runcmd:
 EOF
 
 qm set $VMID --agent 1 --cicustom user="${VM_SNIPPETS_STORAGE_NAME}:snippets/${VMID}.yml"
-qm start $VMID
 
-rm -f ${VM_CLOUDIMG_FULL_PATH}
+# if --no-start wasn't spedified, start the VM after it's created
+if [ -z $VM_NO_START_CREATED ]; then qm start $VMID; done
