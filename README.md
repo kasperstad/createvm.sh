@@ -16,26 +16,14 @@ root@pve:~# chmod a+rx /usr/local/sbin/vmbuilder
 Usage: vmbuilder <parameters> ...
 
 Parameters:
-    -a, --agent             Install QEMU Agent using cloud-init user-data (default is not installed)
-                            If this switch is appended to the command a warning about not being able to modify user-data through Proxmox WebUI is shown
     -c, --cores             CPU Cores that will be assigned to the VM (default: 1)
-    --cloudimg-cache-path   Path where Ubuntu Cloud Image should be stored (default: /var/lib/vz/template)
-    -d, --domain            Domainname of this VM eg. example.com (default: localdomain)
-    --disk-format           Format of the disk, leave out if not using a supported storage (valid formats: qcow2/raw/vmdk)
-                            For LVM-Thin storage (this scripts default) don't specify anything
     --disk-size             Size of the VM disk in GB (default: 20)
-    --dns-server            DNS Server (default: 8.8.8.8)
-    --gateway               Default Gateway, if undefined, script will set it to the specified IP with the fouth octet as .1
-                            (eg. default gateway will be 192.168.1.1)
     -h, --help              Show this help message.
     -i, --ip-address        (required) IP Address of this VM in CIDR format (eg. 192.168.1.2/24)
     -m, --memory            Memory that will be allocated to the VM in MB (default: 1024)
     -n, --name              (required) Name of the VM without spaces, dots and other ambiguous characters
-    --network-bridge        Network Bridge that the VM should be attached to (default: vmbr0)
-    --no-start-created      Don't start the VM after it's created
-    --ssh-keyfile           (required) SSH Keys used for ssh'ing in using the user "ubuntu", multiple ssh-keys allowed in file (one key on each line)
-    -s, --storage           Storage where the VM will be placed (default: local-lvm)
-    --vlan                  VLAN Tag for network interface
+    --no-start              Don't start after VM is created (if you need to append user-data)
+    --username              Override default username (default: ubuntu)
 ```
 
 ## License
