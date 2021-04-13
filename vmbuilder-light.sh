@@ -41,6 +41,8 @@ function get_help()
     echo "    -i, --ip-address        (required) IP Address of this VM in CIDR format (eg. 192.168.1.2/24)"
     echo "    -m, --memory            Memory that will be allocated to the VM in MB (default: 1024)"
     echo "    -n, --name              (required) Name of the VM without spaces, dots and other ambiguous characters"
+    echo "    --no-start              Don't start after VM is created (if you need to append user-data)"
+    echo "    --username              Override default username (default: ubuntu)"
     echo
     exit 1
 }
@@ -100,6 +102,11 @@ while [ ${#} -gt 0 ]; do
             VM_NO_START_CREATED=1
             shift
             ;;
+        --username)
+            VM_USERNAME="$2"
+            shift
+            shift
+            ;;
         *)
             get_help
             ;;
@@ -122,6 +129,7 @@ VM_SNIPPETS_STORAGE_NAME=${VM_SNIPPETS_STORAGE_NAME:-"local"}
 VM_SNIPPETS_STORAGE_PATH=${VM_SNIPPETS_STORAGE_PATH:-"/var/lib/vz/snippets"}
 VM_SSH_KEYFILE=${VM_SSH_KEYFILE:-"${HOME}/.ssh/id_rsa.pub"}
 VM_STORAGE=${VM_STORAGE:-"local-lvm"}
+VM_USERNAME=${VM_USERNAME:-""}
 
 # Get Help if you don't specify required parameters (yes I know I'm a little demanding ;) )...
 if [[ -z $VM_NAME || -z $VM_IP_ADDRESS || -z $VM_SSH_KEYFILE ]]; then
@@ -177,6 +185,10 @@ if [ -z "${VM_GATEWAY}" ]; then
     VM_GATEWAY="$(echo ${VM_IP_ADDRESS} | cut -d '.' -f -3).1"
 fi
 
+if [ ! -z "${VM_USERNAME}" ]; then
+    qm set $VMID --ciuser="${VM_USERNAME}"
+fi
+
 # Setup the network, DNS server and domain
 qm set $VMID --ipconfig0 ip=$VM_IP_ADDRESS,gw=$VM_GATEWAY
 qm set $VMID --nameserver $VM_DNS_SERVER --searchdomain $VM_DOMAIN
@@ -201,4 +213,4 @@ EOF
 qm set $VMID --agent 1 --cicustom user="${VM_SNIPPETS_STORAGE_NAME}:snippets/${VMID}.yml"
 
 # if --no-start wasn't spedified, start the VM after it's created
-if [ -z $VM_NO_START_CREATED ]; then qm start $VMID; done
+if [ -z $VM_NO_START_CREATED ]; then qm start $VMID; fi
