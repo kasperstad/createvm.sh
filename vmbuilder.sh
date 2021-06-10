@@ -37,6 +37,7 @@ function get_help()
     echo "Parameters:"
     echo "    -c, --cores             CPU Cores that will be assigned to the VM (default: 1)"
     echo "    --disk-size             Size of the VM disk in GB (default: 20)"
+    echo "    --docker                Preinstall Docker on the server using cloud-init"
     echo "    -h, --help              Show this help message."
     echo "    -i, --ip-address        (required) IP Address of this VM in CIDR format (eg. 192.168.1.2/24)"
     echo "    -m, --memory            Memory that will be allocated to the VM in MB (default: 1024)"
@@ -69,6 +70,10 @@ while [ ${#} -gt 0 ]; do
         --disk-size)
             VM_DISK_SIZE="$2"
             shift
+            shift
+            ;;
+        --docker)
+            VM_INSTALL_DOCKER=1
             shift
             ;;
         -h|--help)
@@ -120,14 +125,14 @@ VM_CLOUDIMG_URL="https://cloud-images.ubuntu.com/focal/current/focal-server-clou
 # CHANGE THESE VALUES AS NEEDED IF YOU LIKE!
 VM_CORES=${VM_CORES:-1}
 VM_DISK_SIZE=${VM_DISK_SIZE:-10}
-VM_DNS_SERVER=${VM_DNS_SERVER:-"8.8.8.8"}
-VM_DOMAIN=${VM_DOMAIN:-"localdomain"}
+VM_DNS_SERVER=${VM_DNS_SERVER:-"10.85.10.2"}
+VM_DOMAIN=${VM_DOMAIN:-"kdst.dk"}
 VM_MEMORY=${VM_MEMORY:-1024}
 VM_NET_BRIDGE=${VM_NET_BRIDGE:-"vmbr0"}
-VM_NET_VLAN=${VM_NET_VLAN:-""}
+VM_NET_VLAN=${VM_NET_VLAN:-2}
 VM_SNIPPETS_STORAGE_NAME=${VM_SNIPPETS_STORAGE_NAME:-"local"}
 VM_SNIPPETS_STORAGE_PATH=${VM_SNIPPETS_STORAGE_PATH:-"/var/lib/vz/snippets"}
-VM_SSH_KEYFILE=${VM_SSH_KEYFILE:-"${HOME}/.ssh/id_rsa.pub"}
+VM_SSH_KEYFILE=${VM_SSH_KEYFILE:-"${HOME}/.ssh/kasper.pub"}
 VM_STORAGE=${VM_STORAGE:-"local-lvm"}
 VM_USERNAME=${VM_USERNAME:-""}
 
@@ -199,7 +204,9 @@ VM_CICUSTOM_USER_DATA="${VM_SNIPPETS_STORAGE_PATH}/${VMID}.yml"
 echo -e "[$BASENAME]: \033[1;33mYou have choosen to install qemu-guest-agent on ${VM_NAME} (id: ${VMID}) automatically\033[0m"
 echo -e "[$BASENAME]: \033[1;33mThis prevents modifications to user-data through Proxmox WebUI, but allows you to edit this yaml user-data file instead:\033[0m"
 echo -e "[$BASENAME]: \033[1;33m  ${VM_CICUSTOM_USER_DATA}\033[0m"; sleep 1
-cat > $VM_CICUSTOM_USER_DATA << EOF
+
+if [ -z $VM_INSTALL_DOCKER ]; then
+    cat > $VM_CICUSTOM_USER_DATA << EOF
 $(qm cloudinit dump $VMID user)
 apt_reboot_if_required: True
 timezone: Europe/Copenhagen
@@ -209,6 +216,25 @@ runcmd:
   - systemctl enable qemu-guest-agent
   - systemctl restart qemu-guest-agent
 EOF
+else
+   cat > $VM_CICUSTOM_USER_DATA << EOF
+$(qm cloudinit dump $VMID user)
+apt_reboot_if_required: True
+timezone: Europe/Copenhagen
+apt:
+  sources:
+    docker.list:
+      source: deb [arch=amd64] https://download.docker.com/linux/ubuntu stable
+      keyid: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
+packages:
+  - docker-ce
+  - docker-ce-cli
+  - qemu-guest-agent
+runcmd:
+  - systemctl enable qemu-guest-agent
+  - systemctl restart qemu-guest-agent
+EOF
+fi
 
 qm set $VMID --agent 1 --cicustom user="${VM_SNIPPETS_STORAGE_NAME}:snippets/${VMID}.yml"
 
