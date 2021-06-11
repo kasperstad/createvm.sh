@@ -18,7 +18,9 @@ Usage: vmbuilder <parameters> ...
 Parameters:
     -c, --cores             CPU Cores that will be assigned to the VM (default: 1)
     --disk-size             Size of the VM disk in GB (default: 20)
+    --dns-server            DNS Server for deployment (default: 8.8.8.8)
     --docker                Preinstall Docker on the server using cloud-init
+    --domain                Domain for deployment (default: cloud.local)
     -h, --help              Show this help message.
     -i, --ip-address        (required) IP Address of this VM in CIDR format (eg. 192.168.1.2/24)
     -m, --memory            Memory that will be allocated to the VM in MB (default: 1024)
