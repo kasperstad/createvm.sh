@@ -3,7 +3,7 @@ set -e
 
 # MIT License
 #
-# Copyright (c) 2020 Kasper Stad
+# Copyright (c) 2021 Kasper Stad
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +37,9 @@ function get_help()
     echo "Parameters:"
     echo "    -c, --cores             CPU Cores that will be assigned to the VM (default: 1)"
     echo "    --disk-size             Size of the VM disk in GB (default: 20)"
+    echo "    --dns-server            DNS Server for deployment (default: 8.8.8.8)"
     echo "    --docker                Preinstall Docker on the server using cloud-init"
+    echo "    --domain                Domain for deployment (default: cloud.local)"
     echo "    -h, --help              Show this help message."
     echo "    -i, --ip-address        (required) IP Address of this VM in CIDR format (eg. 192.168.1.2/24)"
     echo "    -m, --memory            Memory that will be allocated to the VM in MB (default: 1024)"
@@ -72,8 +74,18 @@ while [ ${#} -gt 0 ]; do
             shift
             shift
             ;;
+        --dns-server)
+            VM_DNS_SERVER="$2"
+            shift
+            shift
+            ;;
         --docker)
             VM_INSTALL_DOCKER=1
+            shift
+            ;;
+        --domain)
+            VM_DOMAIN="$2"
+            shift
             shift
             ;;
         -h|--help)
@@ -124,15 +136,15 @@ VM_CLOUDIMG_URL="https://cloud-images.ubuntu.com/focal/current/focal-server-clou
 # Default values if they wasn't defined as parameters
 # CHANGE THESE VALUES AS NEEDED IF YOU LIKE!
 VM_CORES=${VM_CORES:-1}
-VM_DISK_SIZE=${VM_DISK_SIZE:-10}
-VM_DNS_SERVER=${VM_DNS_SERVER:-"10.85.10.2"}
-VM_DOMAIN=${VM_DOMAIN:-"kdst.dk"}
+VM_DISK_SIZE=${VM_DISK_SIZE:-20}
+VM_DNS_SERVER=${VM_DNS_SERVER:-"8.8.8.8"}
+VM_DOMAIN=${VM_DOMAIN:-"cloud.local"}
 VM_MEMORY=${VM_MEMORY:-1024}
 VM_NET_BRIDGE=${VM_NET_BRIDGE:-"vmbr0"}
 VM_NET_VLAN=${VM_NET_VLAN:-2}
 VM_SNIPPETS_STORAGE_NAME=${VM_SNIPPETS_STORAGE_NAME:-"local"}
 VM_SNIPPETS_STORAGE_PATH=${VM_SNIPPETS_STORAGE_PATH:-"/var/lib/vz/snippets"}
-VM_SSH_KEYFILE=${VM_SSH_KEYFILE:-"${HOME}/.ssh/kasper.pub"}
+VM_SSH_KEYFILE=${VM_SSH_KEYFILE:-"${HOME}/.ssh/id_rsa.pub"}
 VM_STORAGE=${VM_STORAGE:-"local-lvm"}
 VM_USERNAME=${VM_USERNAME:-""}
 
