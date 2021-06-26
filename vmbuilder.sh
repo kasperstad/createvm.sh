@@ -3,7 +3,7 @@ set -e
 
 # MIT License
 #
-# Copyright (c) 2021 Kasper Stad
+# Copyright (c) 2020 Kasper Stad
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -38,7 +38,6 @@ function get_help()
     echo "    -c, --cores             CPU Cores that will be assigned to the VM (default: 1)"
     echo "    --disk-size             Size of the VM disk in GB (default: 20)"
     echo "    --dns-server            DNS Server for deployment (default: 8.8.8.8)"
-    echo "    --docker                Preinstall Docker on the server using cloud-init"
     echo "    --domain                Domain for deployment (default: cloud.local)"
     echo "    -h, --help              Show this help message."
     echo "    -i, --ip-address        (required) IP Address of this VM in CIDR format (eg. 192.168.1.2/24)"
@@ -77,10 +76,6 @@ while [ ${#} -gt 0 ]; do
         --dns-server)
             VM_DNS_SERVER="$2"
             shift
-            shift
-            ;;
-        --docker)
-            VM_INSTALL_DOCKER=1
             shift
             ;;
         --domain)
@@ -217,8 +212,8 @@ echo -e "[$BASENAME]: \033[1;33mYou have choosen to install qemu-guest-agent on 
 echo -e "[$BASENAME]: \033[1;33mThis prevents modifications to user-data through Proxmox WebUI, but allows you to edit this yaml user-data file instead:\033[0m"
 echo -e "[$BASENAME]: \033[1;33m  ${VM_CICUSTOM_USER_DATA}\033[0m"; sleep 1
 
-if [ -z $VM_INSTALL_DOCKER ]; then
-    cat > $VM_CICUSTOM_USER_DATA << EOF
+
+cat > $VM_CICUSTOM_USER_DATA << EOF
 $(qm cloudinit dump $VMID user)
 apt_reboot_if_required: True
 timezone: Europe/Copenhagen
@@ -228,25 +223,6 @@ runcmd:
   - systemctl enable qemu-guest-agent
   - systemctl restart qemu-guest-agent
 EOF
-else
-   cat > $VM_CICUSTOM_USER_DATA << EOF
-$(qm cloudinit dump $VMID user)
-apt_reboot_if_required: True
-timezone: Europe/Copenhagen
-apt:
-  sources:
-    docker.list:
-      source: deb [arch=amd64] https://download.docker.com/linux/ubuntu \$RELEASE stable
-      keyid: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
-packages:
-  - docker-ce
-  - docker-ce-cli
-  - qemu-guest-agent
-runcmd:
-  - systemctl enable qemu-guest-agent
-  - systemctl restart qemu-guest-agent
-EOF
-fi
 
 qm set $VMID --agent 1 --cicustom user="${VM_SNIPPETS_STORAGE_NAME}:snippets/${VMID}.yml"
 
