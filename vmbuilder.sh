@@ -162,7 +162,7 @@ VMID=$(pvesh get /cluster/nextid)
 qm create $VMID --name $VM_NAME --cores $VM_CORES --memory $VM_MEMORY -ostype l26
 
 # Import the image to the storage
-qm importdisk $VMID $VM_CLOUDIMG_FULL_PATH $VM_STORAGE | egrep -v '^transferred:'
+qm importdisk $VMID $VM_CLOUDIMG_FULL_PATH $VM_STORAGE | egrep -v '^transferred'
 
 # Delete cloud-image when disk is imported
 rm -f ${VM_CLOUDIMG_FULL_PATH}
