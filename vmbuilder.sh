@@ -159,7 +159,7 @@ wget --show-progress -o /dev/null -O $VM_CLOUDIMG_FULL_PATH $VM_CLOUDIMG_URL
 
 # Fetch the next available VM ID, if not provided
 if [ -z $VMID ]; then
-	VMID=$(pvesh get /cluster/nextid)
+    VMID=$(pvesh get /cluster/nextid)
 fi
 
 # Create the new VM
