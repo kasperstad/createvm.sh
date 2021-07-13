@@ -22,6 +22,7 @@ Parameters:
     --domain                Domain for deployment (default: cloud.local)
     -h, --help              Show this help message.
     -i, --ip-address        (required) IP Address of this VM in CIDR format (eg. 192.168.1.2/24)
+    --id                    Custom VM ID (if undefined, next available ID in cluster is used)
     -m, --memory            Memory that will be allocated to the VM in MB (default: 1024)
     -n, --name              (required) Name of the VM without spaces, dots and other ambiguous characters
     --no-start              Don't start after VM is created (if you need to append user-data)
