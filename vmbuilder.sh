@@ -41,6 +41,7 @@ function get_help()
     echo "    --domain                Domain for deployment (default: cloud.local)"
     echo "    -h, --help              Show this help message."
     echo "    -i, --ip-address        (required) IP Address of this VM in CIDR format (eg. 192.168.1.2/24)"
+    echo "    --id                    Custom VM ID (if undefined, next available ID in cluster is used)"
     echo "    -m, --memory            Memory that will be allocated to the VM in MB (default: 1024)"
     echo "    -n, --name              (required) Name of the VM without spaces, dots and other ambiguous characters"
     echo "    --no-start              Don't start after VM is created (if you need to append user-data)"
@@ -142,6 +143,7 @@ VM_SNIPPETS_STORAGE_PATH=${VM_SNIPPETS_STORAGE_PATH:-"/var/lib/vz/snippets"}
 VM_SSH_KEYFILE=${VM_SSH_KEYFILE:-"${HOME}/.ssh/id_rsa.pub"}
 VM_STORAGE=${VM_STORAGE:-"local-lvm"}
 VM_USERNAME=${VM_USERNAME:-""}
+VMID=${VMID:-""}
 
 # Get Help if you don't specify required parameters (yes I know I'm a little demanding ;) )...
 if [[ -z $VM_NAME || -z $VM_IP_ADDRESS || -z $VM_SSH_KEYFILE ]]; then
@@ -155,8 +157,10 @@ VM_CLOUDIMG_FULL_PATH="/tmp/${VM_CLOUDIMG_NAME}"
 echo -e "[$BASENAME]: \033[1;32mdownloading image...\033[0m"
 wget --show-progress -o /dev/null -O $VM_CLOUDIMG_FULL_PATH $VM_CLOUDIMG_URL
 
-# Fetch the next available VM ID
-VMID=$(pvesh get /cluster/nextid)
+# Fetch the next available VM ID, if not provided
+if [ -z $VMID ]; then
+	VMID=$(pvesh get /cluster/nextid)
+fi
 
 # Create the new VM
 qm create $VMID --name $VM_NAME --cores $VM_CORES --memory $VM_MEMORY -ostype l26
