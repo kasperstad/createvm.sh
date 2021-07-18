@@ -46,6 +46,7 @@ function get_help()
     echo "    -n, --name              (required) Name of the VM without spaces, dots and other ambiguous characters"
     echo "    --no-start              Don't start after VM is created (if you need to append user-data)"
     echo "    --username              Override default username (default: ubuntu)"
+    echo "    --vlan                  VLAN for the primary network interface (Set to 0 if no VLAN)"
     echo
     exit 1
 }
@@ -120,6 +121,11 @@ while [ ${#} -gt 0 ]; do
             shift
             shift
             ;;
+        --vlan)
+            VM_NET_VLAN=$2
+            shift
+            shift
+            ;;
         *)
             get_help
             ;;
@@ -190,7 +196,7 @@ qm set $VMID --sshkey $VM_SSH_KEYFILE
 qm set $VMID --serial0 socket --vga serial0
 
 # Attach network interface to a bridge, and optionally set VLAN tag
-if [ ! -z $VM_NET_VLAN ]; then
+if [[ ! -z $VM_NET_VLAN ]] && [[ $VM_NET_VLAN -ne 0 ]]; then
     qm set $VMID --net0 virtio,bridge=$VM_NET_BRIDGE,tag=$VM_NET_VLAN
 else
     qm set $VMID --net0 virtio,bridge=$VM_NET_BRIDGE
