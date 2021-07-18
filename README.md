@@ -27,6 +27,7 @@ Parameters:
     -n, --name              (required) Name of the VM without spaces, dots and other ambiguous characters
     --no-start              Don't start after VM is created (if you need to append user-data)
     --username              Override default username (default: ubuntu)
+    --vlan                  VLAN for the primary network interface (Set to 0 if no VLAN)
 ```
 
 ## License
