@@ -39,6 +39,7 @@ function get_help()
     echo "    --disk-size             Size of the VM disk in GB (default: 20)"
     echo "    --dns-server            DNS Server for deployment (default: 8.8.8.8)"
     echo "    --domain                Domain for deployment (default: cloud.local)"
+    echo "    --gateway               Default Gateway, if not specified it will be constructed to ip-address replaced the last octet to .1 (eg. 192.168.1.1)"
     echo "    -h, --help              Show this help message."
     echo "    -i, --ip-address        (required) IP Address of this VM in CIDR format (eg. 192.168.1.2/24)"
     echo "    --id                    Custom VM ID (if undefined, next available ID in cluster is used)"
@@ -82,6 +83,11 @@ while [ ${#} -gt 0 ]; do
             ;;
         --domain)
             VM_DOMAIN="$2"
+            shift
+            shift
+            ;;
+        --gateway)
+            VM_GATEWAY="$2"
             shift
             shift
             ;;
@@ -141,6 +147,7 @@ VM_CORES=${VM_CORES:-1}
 VM_DISK_SIZE=${VM_DISK_SIZE:-20}
 VM_DNS_SERVER=${VM_DNS_SERVER:-"8.8.8.8"}
 VM_DOMAIN=${VM_DOMAIN:-"cloud.local"}
+VM_GATEWAY=${VM_GATEWAY:-""}
 VM_MEMORY=${VM_MEMORY:-1024}
 VM_NET_BRIDGE=${VM_NET_BRIDGE:-"vmbr0"}
 VM_NET_VLAN=${VM_NET_VLAN:-2}
