@@ -20,6 +20,7 @@ Parameters:
     --disk-size             Size of the VM disk in GB (default: 20)
     --dns-server            DNS Server for deployment (default: 8.8.8.8)
     --domain                Domain for deployment (default: cloud.local)
+    --gateway               Default Gateway, if not specified it will be constructed (eg. 192.168.1.1)
     -h, --help              Show this help message.
     -i, --ip-address        (required) IP Address of this VM in CIDR format (eg. 192.168.1.2/24)
     --id                    Custom VM ID (if undefined, next available ID in cluster is used)
